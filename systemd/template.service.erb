@@ -1,0 +1,16 @@
+[Unit]
+Description=<%= description %>
+Requires=<%= requires %>
+
+[Service]
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=<%= name %>
+WorkingDirectory=<%= maindir %>
+ExecStart=/bin/bash -x <%= maindir %>/run_container.sh <%= container_name %> 2>&1
+ExecStop=/bin/bash -x <%= maindir %>/destroy_container.sh <%= container_name %> 2>&1
+TimeoutStartSec=10min
+
+[Install]
+WantedBy=default.target

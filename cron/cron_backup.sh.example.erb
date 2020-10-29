@@ -1,0 +1,13 @@
+#!/bin/bash
+
+exec 2>&1
+set -e
+set -x
+
+. <%= maindir %>/script_basics.sh
+
+cd <%= maindir %>/cron/
+$CONTAINER_BIN cp mysql_backup.sh database:/tmp/
+$CONTAINER_BIN cp my.cnf database:/tmp/
+$CONTAINER_BIN exec -t database /tmp/mysql_backup.sh
+$CONTAINER_BIN cp /dev/null database:/tmp/my.cnf

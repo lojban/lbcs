@@ -1,0 +1,79 @@
+#!/usr/bin/env ruby
+
+require 'erb'
+
+if ARGV.length < 4
+    puts "Need at least 4 arguments.  Also, this is only for lbcs scripts.  How are you even seeing this?"
+    exit 1
+end
+
+maindir=ARGV[0]
+lbcsdir=ARGV[1]
+container=ARGV[2]
+templatefile=ARGV[3]
+
+if ! File.directory?(maindir)
+    puts "maindir arg '#{maindir}' doesn't look like a directory"
+    exit 1
+end
+
+if ! File.directory?(lbcsdir)
+    puts "lbcsdir arg '#{lbcsdir}' doesn't look like a directory"
+    exit 1
+end
+
+containerdir=File.join(maindir, "containers", container)
+
+if ! File.directory?(containerdir)
+    puts "containerdir arg '#{containerdir}' doesn't look like a directory"
+    exit 1
+end
+
+if ! File.exists?(templatefile)
+    puts "templatefile arg '#{templatefile}' doesn't look like a file"
+    exit 1
+end
+
+vals={}
+
+vals['maindir']=maindir
+vals['lbcsdir']=lbcsdir
+vals['containerdir']=containerdir
+vals['container']=container
+vals['container_name']=container
+
+# All args past the 4th are "foo=bar" stuff to add to the
+# erb variable list
+for arg in ARGV[4..] do
+    stuff = arg.split('=', 2)
+    vals[stuff[0]] = stuff[1]
+end
+
+files = [
+    File.join(maindir, 'config'), 
+    File.join(maindir, 'secrets'), 
+    File.join(lbcsdir, 'config'), 
+    File.join(lbcsdir, 'secrets'), 
+    File.join(containerdir, 'config'), 
+    File.join(containerdir, 'secrets'), 
+]
+
+# Now get all the vals from all the config and secrets files
+for varfile in files do
+    if File.exist?(varfile)
+        for line in File.read(varfile).lines do
+            line = line.gsub(%r{#.*},'').strip
+
+            # Ruby local variables must start with a lower case letter
+            # or underscore.  Also we don't care about lines with no =
+            if line =~ %r{^[a-z_].*=}
+                stuff = line.split('=', 2)
+                vals[stuff[0]] = stuff[1]
+            end
+        end
+    end
+end
+
+text = File.read(templatefile)
+
+puts ERB.new(text).result_with_hash(vals)

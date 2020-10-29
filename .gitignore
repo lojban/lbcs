@@ -1,0 +1,5 @@
+# Vim
+[._]*.sw[a-p]
+*~
+
+config
