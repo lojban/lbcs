@@ -57,6 +57,12 @@ then
     exit 1
 fi
 
+if [[ $service = $name ]]
+then
+    echo "The service name ($service) and the container name ($name) can't be the same; modify one of the config files to fix please."
+    exit 1
+fi
+
 $maindir/destroy_container.sh $container
 
 $maindir/build_image.sh $container
