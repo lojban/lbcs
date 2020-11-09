@@ -30,7 +30,7 @@ description="HELP ME $name"
 requires=$name.service
 name=$name
 version=1
-run_args='-v $maindir/$name/src:/src'
+run_args='-v $maindir/containers/$name/src:/src'
 run_program='sleep 999'
 EOF
     cat <<EOF >containers/$name/Dockerfile.erb
@@ -42,11 +42,26 @@ EOF
 FROM fedora:31
 EOF
 
+    cat <<EOF >config
+service=$name
+pod_args='-p 9999:9999'
+EOF
+
     echo -e "\n\nYou'll want to edit the files in containers/$name\n\n"
 
     mkdir -p $maindir/cron
 
     touch $maindir/cron/crontab
+
+    ln -sf /opt/lbcs/README-Basic-Usage.txt
+    ln -sf /opt/lbcs/build_image.sh
+    ln -sf /opt/lbcs/cron/cron-run-inside.sh cron/cron-run-inside.sh
+    ln -sf /opt/lbcs/destroy_container.sh
+    ln -sf /opt/lbcs/initial_setup.sh
+    ln -sf /opt/lbcs/run_container.sh
+    ln -sf /opt/lbcs/setup.sh
+
+    echo -e "\n\nIf you use SELinux, you should run initial_setup.sh as root, once.\n\n"
 fi
 
 echo -e "\nRegenerating systemd files."
