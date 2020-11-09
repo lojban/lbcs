@@ -1,5 +1,7 @@
 #!/bin/bash
 
+shopt -s nullglob
+
 exec 2>&1
 set -e
 
