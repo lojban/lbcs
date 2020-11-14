@@ -33,8 +33,6 @@ It is expected that the entire service directory will be in source
 control (i.e. git).  I personally simply move directories around in
 the actual service's code source tree to match the layout below.
 
-FIXME: link to example repo that uses this
-
 General Layout
 --------------
 
@@ -107,7 +105,8 @@ Getting Started
 ===============
 
 https://github.com/lojban/haproxy makes a really good example of a
-thoroughly minimal setup, whereas FIXME: ??? is much less minimal.
+thoroughly minimal setup, whereas
+https://github.com/lojban/jbovlaste-containers is much less minimal.
 
 $ ln -s /opt/lbcs/setup.sh
 $ ./setup.sh
