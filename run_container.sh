@@ -73,12 +73,23 @@ then
     hasterm='-t'
 fi
 
+# If there's no containers running in this service, take the
+# opportunity to rebuild the pod, in case anything has changed
+#
+# If there's only one container in the pod, that's the
+# infrastructure container (or it's broken)
+if [[ $(podman pod inspect jbovlaste | jq -r '.Containers | .[].State' | grep '^running$' | wc -l) -le 1 ]]
+then
+    $CONTAINER_BIN pod rm $service || true
+fi
+
 # Create a pod so that only the other containers in the pod (i.e. the web
 # server) can see private things (i.e. the database)
 if $CONTAINER_BIN pod exists $service
 then
     echo -e "\nPod $service already exists\n"
 else
+    $CONTAINER_BIN pod rm $service || true
     echo -e "\nCreating pod $service\n"
     $CONTAINER_BIN pod create --share=net -n $service $pod_args
 fi
