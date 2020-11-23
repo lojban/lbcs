@@ -114,7 +114,7 @@ then
     for file in $files_to_erb_on_run
     do
         echo "ERBing $maindir/$file.erb to $maindir/$file"
-        $lbcsdir/lbcserb $maindir $lbcsdir $container $maindir/$file.erb > $maindir/$file
+        $lbcsdir/lbcserb $maindir $lbcsdir $container "$maindir/$file.erb" "$maindir/$file"
     done
 fi
 

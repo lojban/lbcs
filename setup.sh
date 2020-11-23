@@ -72,7 +72,7 @@ for container in $(ls -1 containers/)
 do
     (
         . containers/$container/config
-	$lbcsdir/lbcserb $maindir $lbcsdir $container $lbcsdir/systemd/template.service.erb > ~/.config/systemd/user/$name.service
+        $lbcsdir/lbcserb $maindir $lbcsdir $container $lbcsdir/systemd/template.service.erb ~/.config/systemd/user/$name.service
         rm -f ~/.config/systemd/user/default.target.wants/$name.service
         ln -s ~/.config/systemd/user/$name.service ~/.config/systemd/user/default.target.wants/$name.service
     )
@@ -100,7 +100,7 @@ for file in $maindir/cron/*.erb
 do
     echo -e "\nERBing cron files: $file\n"
 
-    $lbcsdir/lbcserb $maindir $lbcsdir $container $file userid=$(id -u) groupid=$(id -g) > $(echo "$file" | sed 's/\.erb$//')
+    $lbcsdir/lbcserb $maindir $lbcsdir $container "$file" "$(echo "$file" | sed 's/\.erb$//')" userid=$(id -u) groupid=$(id -g)
 done
 
 cat $maindir/cron/crontab | crontab -
