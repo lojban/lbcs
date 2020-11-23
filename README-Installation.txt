@@ -131,6 +131,21 @@ will destroy whatever's already there.
 
 Put any secrets files in .gitignore
 
+Ordering
+--------
+
+If your stuff needs the network to be up before running (as most
+things do), add "needs_network=true" to the container config file.
+
+If a container needs to start after other container(s), put
+something like this in the container config file:
+
+    after_containers='jvs-web jvs-db'
+
+or
+
+    after_containers=jvs-db
+
 Configuration
 =============
 
