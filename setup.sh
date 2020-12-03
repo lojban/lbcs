@@ -22,12 +22,13 @@ cd "$maindir"
 # First check to see if it's brand new
 if [[ ! -d containers/ ]]
 then
-    echo -ne "\n\nInitial setup detected.  What do you want to name the initial container?  "
+    echo -ne "\n\nInitial setup detected.  What do you want to name the initial container? MUST NOT be the same as the service name.  "
     read name
     mkdir -p containers/$name
     cat <<EOF >containers/$name/config
 description="HELP ME $name"
-requires=$name.service
+needs_network=true
+# after_containers=db
 name=$name
 version=1
 run_args='-v $maindir/containers/$name/src:/src'
