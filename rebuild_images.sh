@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This is often called from cron, so:
+export PATH=$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:$PATH
+
 exec 2>&1
 set -e
 
