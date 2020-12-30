@@ -41,7 +41,7 @@ fi
 if [[ $status ]]
 then
     echo -e "\nTrying to delete container $name\n"
-    $CONTAINER_BIN rm $name
+    $CONTAINER_BIN rm $name || true
 fi
 
 if [[ $(podman ps -a -f name=$name --format '{{.ID}} {{.Status}}' | wc -l) -eq 0 ]]
