@@ -117,7 +117,7 @@ else
     then
         echo -e '\n\nWARNING: You have template files but no .gitignore file; it is important that your template output files be in .gitignore, both to prevent accidental checkins of irrelevant crap and because they might have expanded secrets in them.\n\n'
     else
-        comm -13 <(sort .gitignore) <(cat /tmp/toi.$$ | sed -e "s;^$maindir;;" -e 's/\.erb$//' | sort | uniq) >/tmp/toi-comm.$$
+        comm -13 <(sort .gitignore) <(cat /tmp/toi.$$ | sed -e "s;^$maindir/;;" -e 's/\.erb$//' | sort | uniq) >/tmp/toi-comm.$$
         if [[ $(cat /tmp/toi-comm.$$ | wc -l) -ne 0 ]]
         then
             echo -e '\n\nWARNING: The following files appear to be .erb/template generated and should probably be added to .gitignore. It is important that your template output files be in .gitignore, both to prevent accidental checkins of irrelevant crap and because they might have expanded secrets in them.\n'
