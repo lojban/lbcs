@@ -52,10 +52,11 @@ EOF
 
     mkdir -p $maindir/cron
 
-    touch $maindir/cron/crontab
+    echo -e "# MAILTO=your@email.com\n# Rebuild images every once in a while so we don't have surprises after a reboot of the host\n$(shuf -i 0-59 -n 1) */5 * * * $maindir/rebuild_images.sh" >$maindir/cron/crontab
 
     ln -sf /opt/lbcs/README-Basic-Usage.txt
     ln -sf /opt/lbcs/build_image.sh
+    ln -sf /opt/lbcs/rebuild_images.sh
     ln -sf /opt/lbcs/cron/cron-run-inside.sh cron/cron-run-inside.sh
     ln -sf /opt/lbcs/destroy_container.sh
     ln -sf /opt/lbcs/initial_setup.sh
