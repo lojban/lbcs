@@ -78,7 +78,7 @@ fi
 #
 # If there's only one container in the pod, that's the
 # infrastructure container (or it's broken)
-if [[ $(podman pod inspect $service | jq -r '.Containers | .[].State' | grep '^running$' | wc -l) -le 1 ]]
+if [[ $($CONTAINER_BIN pod inspect $service | jq -r '.Containers | .[].State' | grep '^running$' | wc -l) -le 1 ]]
 then
     $CONTAINER_BIN pod rm $service || true
 fi
