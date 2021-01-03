@@ -138,9 +138,15 @@ fi
 
 echo -e "\nRunning container $name for service $service\n"
 
+userns="--userns=keep-id"
+if [[ $no_userns ]]
+then
+  userns=""
+fi
+
 # Need the eval to expand variables in $run_args itself; probably a better way
 # to do this but meh
-eval $CONTAINER_BIN run --pod=$service --userns=keep-id --name $name \
+eval $CONTAINER_BIN run --pod=$service $userns --name $name \
     $run_args \
     -i $hasterm $(id -un)/$service-$container:$version $run_program 2>&1
 
