@@ -25,7 +25,7 @@ fi
 . $maindir/config
 . $containerdir/config
 
-status="$($CONTAINER_BIN ps -a -f name=$name --format '{{.ID}} {{.Status}}')"
+status="$($CONTAINER_BIN ps -a -f name="^$name$" --format '{{.ID}} {{.Status}}')"
 
 # If it's up, try to kill it
 pat='^[0-9a-f][0-9a-f]* Up'
@@ -44,7 +44,7 @@ then
     $CONTAINER_BIN rm $name || true
 fi
 
-if [[ $($CONTAINER_BIN ps -a -f name=$name --format '{{.ID}} {{.Status}}' | wc -l) -eq 0 ]]
+if [[ $($CONTAINER_BIN ps -a -f name="^$name$" --format '{{.ID}} {{.Status}}' | wc -l) -eq 0 ]]
 then
     echo -e "\nContainer $name stopped and removed\n"
     exit 0
