@@ -15,7 +15,7 @@ Restart=always
 <%- if defined?(needs_network) -%>
 ExecStartPre=/bin/bash -c 'while ! ping -c1 google.com; do sleep 1; done'
 <%- end -%>
-SyslogIdentifier=<%= name %>
+SyslogIdentifier=<%= service %>-<%= name %>
 WorkingDirectory=<%= maindir %>
 ExecStart=/bin/bash -x <%= maindir %>/run_container.sh <%= container_name %> 2>&1
 ExecStop=/bin/bash -x <%= maindir %>/destroy_container.sh <%= container_name %> 2>&1
