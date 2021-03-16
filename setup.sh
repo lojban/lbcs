@@ -17,12 +17,14 @@ then
     fi
 fi
 
-cd "$maindir"
-
 # First check to see if it's brand new
 if [[ ! -d containers/ ]]
 then
-    echo -ne "\n\nInitial setup detected.  What do you want to name the initial container? MUST NOT be the same as the service name.  "
+    maindir=$(pwd)
+
+    echo -ne "\n\nInitial setup detected.  MAKE SURE you're in the directory you want to create a bunch of new things in.  Current directory is $maindir\n\n"
+
+    echo -ne "\n\nWhat do you want to name the initial container? MUST NOT be the same as the service name.  "
     read name
     mkdir -p containers/$name
     cat <<EOF >containers/$name/config
@@ -66,6 +68,8 @@ EOF
     echo -e "\n\nIf you use SELinux, you should run initial_setup.sh as root, once.\n\n"
 fi
 
+cd "$maindir"
+
 echo -e "\nRegenerating systemd files."
 
 mkdir -p ~/.config/systemd/user/default.target.wants
@@ -74,7 +78,17 @@ for container in $(ls -1 containers/)
 do
     (
         . containers/$container/config
-        $lbcsdir/lbcserb $maindir $lbcsdir $container $lbcsdir/systemd/template.service.erb ~/.config/systemd/user/$name.service
+        $lbcsdir/lbcserb $maindir $lbcsdir $container $lbcsdir/systemd/template.service.erb ~/.config/systemd/user/$name.service containers
+        rm -f ~/.config/systemd/user/default.target.wants/$name.service
+        ln -s ~/.config/systemd/user/$name.service ~/.config/systemd/user/default.target.wants/$name.service
+    )
+done
+
+for service in $(ls -1 services/)
+do
+    (
+        . services/$service/config
+        $lbcsdir/lbcserb $maindir $lbcsdir $service $lbcsdir/systemd/template.service.erb ~/.config/systemd/user/$name.service services
         rm -f ~/.config/systemd/user/default.target.wants/$name.service
         ln -s ~/.config/systemd/user/$name.service ~/.config/systemd/user/default.target.wants/$name.service
     )
@@ -102,7 +116,7 @@ for file in $maindir/cron/*.erb
 do
     echo -e "\nERBing cron files: $file\n"
 
-    $lbcsdir/lbcserb $maindir $lbcsdir $container "$file" "$(echo "$file" | sed 's/\.erb$//')" userid=$(id -u) groupid=$(id -g)
+    $lbcsdir/lbcserb $maindir $lbcsdir $container "$file" "$(echo "$file" | sed 's/\.erb$//')" containers userid=$(id -u) groupid=$(id -g)
 done
 
 cat $maindir/cron/crontab | crontab -
@@ -127,3 +141,5 @@ else
     fi
 fi
 rm -f /tmp/toi.$$ /tmp/toi-comm.$$
+
+echo

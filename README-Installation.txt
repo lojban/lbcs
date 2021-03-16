@@ -89,6 +89,9 @@ Example layout:
                     pg_wal/...
                     backups/
                         db_backup.20201008.psql.tgz
+        services/
+            bots/
+                config <-- used to generate systemd service files that don't start a container (i.e. to run things in another container)
 
 The ./build_image.sh script runs "podman build" in the context of
 the main directory, so you can use any file under the main directory
@@ -183,6 +186,15 @@ for the services.  For example, when running Apache you'll typically
 need to copy a file into /etc/httpd/conf.d/ in the running image;
 putting it in the web container is also OK, but it's more of a
 service level item than a source level item.
+
+The services Directory
+----------------------
+
+This is for things where we want to use the LBCS mechanism to
+generate systemd service files, but we don't want to actually run a
+container.  Typically this means we want to run a second thing
+inside an already extant container.  The canonical example is
+https://github.com/lojban/vlasisku-containers/blob/main/services/bots/config
 
 secrets vs. config
 ------------------

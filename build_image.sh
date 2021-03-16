@@ -43,12 +43,12 @@ for file in $maindir/misc/*.erb
 do
     echo -e "\nERBing misc (build-time) files: $file\n" 
 
-    $lbcsdir/lbcserb $maindir $lbcsdir $container "$file" "$( echo "$file" | sed 's/\.erb$//')" userid=$(id -u) groupid=$(id -g)
+    $lbcsdir/lbcserb $maindir $lbcsdir $container "$file" "$( echo "$file" | sed 's/\.erb$//')" containers userid=$(id -u) groupid=$(id -g)
 done
 
 mkdir -p $containerdir/tmp
 
-$lbcsdir/lbcserb $maindir $lbcsdir $container $containerdir/Dockerfile.erb $containerdir/tmp/Dockerfile.$$ userid=$(id -u) groupid=$(id -g)
+$lbcsdir/lbcserb $maindir $lbcsdir $container $containerdir/Dockerfile.erb $containerdir/tmp/Dockerfile.$$ containers userid=$(id -u) groupid=$(id -g)
 
 cd $maindir
 

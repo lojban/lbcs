@@ -12,6 +12,12 @@ lbcsdir=ARGV[1]
 container=ARGV[2]
 templatefile=ARGV[3]
 outputfile=ARGV[4]
+type=ARGV[5]
+
+if type != "containers" && type != "services"
+  puts "Unknown type #{type}"
+  exit 1
+end
 
 if ! File.directory?(maindir)
     puts "maindir arg '#{maindir}' doesn't look like a directory"
@@ -23,7 +29,7 @@ if ! File.directory?(lbcsdir)
     exit 1
 end
 
-containerdir=File.join(maindir, "containers", container)
+containerdir=File.join(maindir, type, container)
 
 if ! File.directory?(containerdir)
     puts "containerdir arg '#{containerdir}' doesn't look like a directory"
