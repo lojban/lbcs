@@ -84,15 +84,18 @@ do
     )
 done
 
-for service in $(ls -1 services/)
-do
-    (
-        . services/$service/config
-        $lbcsdir/lbcserb $maindir $lbcsdir $service $lbcsdir/systemd/template.service.erb ~/.config/systemd/user/$name.service services
-        rm -f ~/.config/systemd/user/default.target.wants/$name.service
-        ln -s ~/.config/systemd/user/$name.service ~/.config/systemd/user/default.target.wants/$name.service
-    )
-done
+if [[ -d services/ ]]
+then
+    for service in $(ls -1 services/)
+    do
+        (
+            . services/$service/config
+            $lbcsdir/lbcserb $maindir $lbcsdir $service $lbcsdir/systemd/template.service.erb ~/.config/systemd/user/$name.service services
+            rm -f ~/.config/systemd/user/default.target.wants/$name.service
+            ln -s ~/.config/systemd/user/$name.service ~/.config/systemd/user/default.target.wants/$name.service
+        )
+    done
+fi
 
 chcon -R -t systemd_unit_file_t ~/.config/systemd/
 
