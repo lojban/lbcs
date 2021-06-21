@@ -24,11 +24,19 @@ then
 
     echo -ne "\n\nInitial setup detected.  MAKE SURE you're in the directory you want to create a bunch of new things in.  Current directory is $maindir\n\n"
 
+    echo -ne "\n\nWhat do you want to name this service/system/thingy as a whole? (Actual systemd service names will be the same as the container names, by default.)  "
+    read servicename
+
+    cat <<EOF >config
+service=$servicename
+pod_args='-p 9999:9999'
+EOF
+
     echo -ne "\n\nWhat do you want to name the initial container? MUST NOT be the same as the service name. Something like 'web' is often a good choice.  "
     read name
     mkdir -p containers/$name
     cat <<EOF >containers/$name/config
-description="HELP ME $name"
+description="FIXME: $servicename's $name container"
 needs_network=true
 # after_containers=db
 name=$name
@@ -45,16 +53,25 @@ EOF
 FROM fedora:31
 EOF
 
-    cat <<EOF >config
-service=$name
-pod_args='-p 9999:9999'
-EOF
-
-    echo -e "\n\nYou'll want to edit the files in containers/$name\n\n"
+    echo -e "\n\nYou'll want to edit the config file, and the files in containers/$name\n\n"
 
     mkdir -p $maindir/cron
 
-    echo -e "LANG=en_US.UTF-8\n# MAILTO=your@email.com\n# Rebuild images every once in a while so we don't have surprises after a reboot of the host\n$(shuf -i 0-59 -n 1) */5 * * * <%= maindir %>/rebuild_images.sh" >$maindir/cron/crontab.erb
+    echo -ne "\n\nWhat email address do you want cron output going to?  "
+    read email
+
+    cat <<EOF >$maindir/cron/crontab.erb
+<%= "\n"*30 %>
+<%= "# YOU ARE IN THE WRONG PLACE" %>
+<%= "# CRONTAB MAINTANED BY LBCS" %>
+<%= "# USE THE ERB FILE" %>
+<%= "# YOU ARE IN THE WRONG PLACE" %>
+<%= "\n"*30 %>
+LANG=en_US.UTF-8
+MAILTO=$email
+# Rebuild images every once in a while so we don't have surprises after a reboot of the host
+$(shuf -i 0-59 -n 1) */5 * * * <%= maindir %>/rebuild_images.sh
+EOF
 
     ln -sf /opt/lbcs/README-Basic-Usage.txt
     ln -sf /opt/lbcs/build_image.sh
@@ -122,7 +139,20 @@ do
     $lbcsdir/lbcserb $maindir $lbcsdir $container "$file" "$(echo "$file" | sed 's/\.erb$//')" containers userid=$(id -u) groupid=$(id -g)
 done
 
-cat $maindir/cron/crontab | crontab -
+if crontab -l 2>&1 | grep -q 'CRONTAB MAINTANED BY LBCS'
+then
+    if diff -q <(crontab -l) $maindir/cron/crontab >/dev/null 2>&1
+    then
+        echo -e "\n\nNo crontab changes.\n\n"
+    else
+        echo -e "\n\nFound crontab changes:\n\n"
+        diff <(crontab -l) $maindir/cron/crontab
+        echo -e "\n\nUpdating crontab.\n\n"
+        cat $maindir/cron/crontab | crontab -
+    fi
+else
+    echo -e '\n\n*** ERROR: crontab does not appear to be LBCS generated; cowardly refusing to overwrite.\n\n'
+fi
 
 echo -e "\nChecking for template output ignores"
 find $maindir/ -type f -name '*.erb' >/tmp/toi.$$
