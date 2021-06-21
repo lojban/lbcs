@@ -24,7 +24,7 @@ then
 
     echo -ne "\n\nInitial setup detected.  MAKE SURE you're in the directory you want to create a bunch of new things in.  Current directory is $maindir\n\n"
 
-    echo -ne "\n\nWhat do you want to name the initial container? MUST NOT be the same as the service name.  "
+    echo -ne "\n\nWhat do you want to name the initial container? MUST NOT be the same as the service name. Something like 'web' is often a good choice.  "
     read name
     mkdir -p containers/$name
     cat <<EOF >containers/$name/config
