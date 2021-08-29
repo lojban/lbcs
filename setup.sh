@@ -139,9 +139,9 @@ do
     $lbcsdir/lbcserb $maindir $lbcsdir $container "$file" "$(echo "$file" | sed 's/\.erb$//')" containers userid=$(id -u) groupid=$(id -g)
 done
 
-if crontab -l 2>&1 | grep -q 'CRONTAB MAINTANED BY LBCS'
+if crontab -l 2>&1 | grep -q 'CRONTAB MAINTANED BY LBCS' || [[ $(crontab -l 2>&1 | grep -v 'no crontab for' | wc -l) -eq 0 ]]
 then
-    if diff -q <(crontab -l) $maindir/cron/crontab >/dev/null 2>&1
+    if diff -q <(crontab -l 2>&1) $maindir/cron/crontab >/dev/null 2>&1
     then
         echo -e "\n\nNo crontab changes.\n\n"
     else
