@@ -29,7 +29,8 @@ then
 
     cat <<EOF >config
 service=$servicename
-pod_args='-p 9999:9999'
+web_port=9999
+pod_args="-p \$web_port:\$web_port"
 EOF
 
     echo -ne "\n\nWhat do you want to name the initial container? MUST NOT be the same as the service name. Something like 'web' is often a good choice.  "
@@ -41,7 +42,7 @@ needs_network=true
 # after_containers=db
 name=$name
 version=1
-run_args='-v $maindir/containers/$name/src:/src'
+run_args='-v \$containerdir/src:/src'
 run_program='sleep 999'
 EOF
     cat <<EOF >containers/$name/Dockerfile.erb
@@ -66,7 +67,7 @@ EOF
 <%= "# CRONTAB MAINTANED BY LBCS" %>
 <%= "# USE THE ERB FILE" %>
 <%= "# YOU ARE IN THE WRONG PLACE" %>
-<%= "\n"*30 %>
+
 LANG=en_US.UTF-8
 MAILTO=$email
 # Rebuild images every once in a while so we don't have surprises after a reboot of the host
