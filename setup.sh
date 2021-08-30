@@ -50,7 +50,7 @@ EOF
 <%= "# YOU ARE IN THE WRONG PLACE use the ERB file" %>
 <%= "# YOU ARE IN THE WRONG PLACE" %>
 
-FROM fedora:31
+FROM fedora:34
 EOF
 
     echo -e "\n\nYou'll want to edit the config file, and the files in containers/$name\n\n"
