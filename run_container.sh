@@ -39,9 +39,9 @@ then
     exit 1
 fi
 
-if [[ ! $service ]]
+if [[ ! $bundle ]]
 then
-    echo "No service name (tag 'service') found in $maindir/config  ; please set."
+    echo "No bundle name (tag 'bundle') found in $maindir/config  ; please set.  (Used to be called 'service'.)"
     exit 1
 fi
 
@@ -57,9 +57,9 @@ then
     exit 1
 fi
 
-if [[ $service = $name ]]
+if [[ $bundle = $name ]]
 then
-    echo "The service name ($service) and the container name ($name) can't be the same; modify one of the config files to fix please."
+    echo "The bundle name ($bundle) and the container name ($name) can't be the same; modify one of the config files to fix please."
     exit 1
 fi
 
@@ -73,25 +73,25 @@ then
     hasterm='-t'
 fi
 
-# If there's no containers running in this service, take the
+# If there's no containers running in this bundle, take the
 # opportunity to rebuild the pod, in case anything has changed
 #
 # If there's only one container in the pod, that's the
 # infrastructure container (or it's broken)
-if [[ $($CONTAINER_BIN pod inspect $service | jq -r '.Containers | .[].State' | grep '^running$' | wc -l) -le 1 ]]
+if [[ $($CONTAINER_BIN pod inspect $bundle | jq -r '.Containers | .[].State' | grep '^running$' | wc -l) -le 1 ]]
 then
-    $CONTAINER_BIN pod rm $service || true
+    $CONTAINER_BIN pod rm $bundle || true
 fi
 
 # Create a pod so that only the other containers in the pod (i.e. the web
 # server) can see private things (i.e. the database)
-if $CONTAINER_BIN pod exists $service
+if $CONTAINER_BIN pod exists $bundle
 then
-    echo -e "\nPod $service already exists\n"
+    echo -e "\nPod $bundle already exists\n"
 else
-    $CONTAINER_BIN pod rm $service || true
-    echo -e "\nCreating pod $service\n"
-    $CONTAINER_BIN pod create --share=net -n $service $pod_args
+    $CONTAINER_BIN pod rm $bundle || true
+    echo -e "\nCreating pod $bundle\n"
+    $CONTAINER_BIN pod create --share=net -n $bundle $pod_args
 fi
 
 if [[ $after_containers ]]
@@ -131,12 +131,12 @@ fi
 
 if [[ $run_pre_script ]]
 then
-    echo -e "\nRunning pre-script for service $service\n"
+    echo -e "\nRunning pre-script for container $container\n"
     bash -c "$(eval $run_pre_script)"
-    echo -e "\nDone running pre-script for service $service\n"
+    echo -e "\nDone running pre-script for container $container\n"
 fi
 
-echo -e "\nRunning container $name for service $service\n"
+echo -e "\nRunning container $name for bundle $bundle\n"
 
 userns="--userns=keep-id"
 if [[ $no_userns ]]
@@ -146,13 +146,13 @@ fi
 
 # Need the eval to expand variables in $run_args itself; probably a better way
 # to do this but meh
-eval $CONTAINER_BIN run --pod=$service $userns --name $name \
+eval $CONTAINER_BIN run --pod=$bundle $userns --name $name \
     $run_args \
-    -i $hasterm $(id -un)/$service-$container:$version $run_program 2>&1
+    -i $hasterm $(id -un)/$bundle-$container:$version $run_program 2>&1
 
 if [[ $run_post_script ]]
 then
-    echo -e "\nRunning post for service $service\n"
+    echo -e "\nRunning post-script for container $container\n"
     bash -c "$run_post_script"
-    echo -e "\nDone running post for service $service\n"
+    echo -e "\nDone running post-script for container $container\n"
 fi

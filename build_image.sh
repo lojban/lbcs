@@ -33,9 +33,9 @@ then
     exit 1
 fi
 
-if [[ ! $service ]]
+if [[ ! $bundle ]]
 then
-    echo "No service name (tag 'service') found in $maindir/config  ; please set."
+    echo "No bundle name (tag 'bundle') found in $maindir/config  ; please set.  (Used to be called 'service'.)"
     exit 1
 fi
 
@@ -43,16 +43,16 @@ for file in $maindir/misc/*.erb
 do
     echo -e "\nERBing misc (build-time) files: $file\n" 
 
-    $lbcsdir/lbcserb $maindir $lbcsdir $container "$file" "$( echo "$file" | sed 's/\.erb$//')" containers userid=$(id -u) groupid=$(id -g)
+    $lbcsdir/lbcserb $maindir $lbcsdir $container "$file" "$( echo "$file" | sed 's/\.erb$//')" container userid=$(id -u) groupid=$(id -g)
 done
 
 mkdir -p $containerdir/tmp
 
-$lbcsdir/lbcserb $maindir $lbcsdir $container $containerdir/Dockerfile.erb $containerdir/tmp/Dockerfile.$$ containers userid=$(id -u) groupid=$(id -g)
+$lbcsdir/lbcserb $maindir $lbcsdir $container $containerdir/Dockerfile.erb $containerdir/tmp/Dockerfile.$$ container userid=$(id -u) groupid=$(id -g)
 
 cd $maindir
 
-$CONTAINER_BIN build -t $(id -un)/$service-$container:$version --quiet=false -f $containerdir/tmp/Dockerfile.$$ .
+$CONTAINER_BIN build -t $(id -un)/$bundle-$container:$version --quiet=false -f $containerdir/tmp/Dockerfile.$$ .
 
 if [[ $? -ne 0 ]]
 then

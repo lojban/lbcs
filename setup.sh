@@ -24,20 +24,20 @@ then
 
     echo -ne "\n\nInitial setup detected.  MAKE SURE you're in the directory you want to create a bunch of new things in.  Current directory is $maindir\n\n"
 
-    echo -ne "\n\nWhat do you want to name this service/system/thingy as a whole? (Actual systemd service names will be the same as the container names, by default.)  "
-    read servicename
+    echo -ne "\n\nWhat do you want to name this bundle (AKA service/system/project/thingy) as a whole?  Examples are things like 'mymediawiki' or 'awesome_web_thingy', whereas containers will be named things like 'web' or 'db'.  "
+    read bundle
 
     cat <<EOF >config
-service=$servicename
+bundle=$bundle
 web_port=9999
 pod_args="-p \$web_port:\$web_port"
 EOF
 
-    echo -ne "\n\nWhat do you want to name the initial container? MUST NOT be the same as the service name. Something like 'web' is often a good choice.  "
+    echo -ne "\n\nWhat do you want to name the initial container? MUST NOT be the same as the bundle name. Something like 'web' is often a good choice.  "
     read name
     mkdir -p containers/$name
     cat <<EOF >containers/$name/config
-description="FIXME: $servicename's $name container"
+description="FIXME: $bundle's $name container"
 needs_network=true
 # after_containers=db
 name=$name
@@ -86,6 +86,19 @@ EOF
     echo -e "\n\nIf you use SELinux, you should run initial_setup.sh as root, once.\n\n"
 fi
 
+. $lbcsdir/config
+. $maindir/config
+if [[ -f $maindir/secrets ]]
+then
+    . $maindir/secrets
+fi
+
+if [[ ! $bundle ]]
+then
+    echo "No bundle name (tag 'bundle') found in $maindir/config  ; please set.  (Used to be called 'service'.)"
+    exit 1
+fi
+
 cd "$maindir"
 
 echo -e "\nRegenerating systemd files."
@@ -96,24 +109,24 @@ for container in $(ls -1 containers/)
 do
     (
         . containers/$container/config
-        $lbcsdir/lbcserb $maindir $lbcsdir $container $lbcsdir/systemd/template.service.erb ~/.config/systemd/user/$name.service containers
+        $lbcsdir/lbcserb $maindir $lbcsdir $container $lbcsdir/systemd/template.service.erb ~/.config/systemd/user/$name.service container
         rm -f ~/.config/systemd/user/default.target.wants/$name.service
         ln -s ~/.config/systemd/user/$name.service ~/.config/systemd/user/default.target.wants/$name.service
     )
-done
 
-if [[ -d services/ ]]
-then
-    for service in $(ls -1 services/)
-    do
-        (
-            . services/$service/config
-            $lbcsdir/lbcserb $maindir $lbcsdir $service $lbcsdir/systemd/template.service.erb ~/.config/systemd/user/$name.service services
-            rm -f ~/.config/systemd/user/default.target.wants/$name.service
-            ln -s ~/.config/systemd/user/$name.service ~/.config/systemd/user/default.target.wants/$name.service
-        )
-    done
-fi
+    if [[ -d containers/$container/addons/ ]]
+    then
+        for addon in $(ls -1 containers/$container/addons/)
+        do
+            (
+                . containers/$container/addons/$addon/config
+                $lbcsdir/lbcserb $maindir $lbcsdir $container $lbcsdir/systemd/template.service.erb ~/.config/systemd/user/$name.service addon $addon
+                rm -f ~/.config/systemd/user/default.target.wants/$name.service
+                ln -s ~/.config/systemd/user/$name.service ~/.config/systemd/user/default.target.wants/$name.service
+            )
+        done
+    fi
+done
 
 chcon -R -t systemd_unit_file_t ~/.config/systemd/
 
@@ -137,7 +150,7 @@ for file in $maindir/cron/*.erb
 do
     echo -e "\nERBing cron files: $file\n"
 
-    $lbcsdir/lbcserb $maindir $lbcsdir $container "$file" "$(echo "$file" | sed 's/\.erb$//')" containers userid=$(id -u) groupid=$(id -g)
+    $lbcsdir/lbcserb $maindir $lbcsdir $container "$file" "$(echo "$file" | sed 's/\.erb$//')" container userid=$(id -u) groupid=$(id -g)
 done
 
 if crontab -l 2>&1 | grep -q 'CRONTAB MAINTANED BY LBCS' || [[ $(crontab -l 2>&1 | grep -v 'no crontab for' | wc -l) -eq 0 ]]

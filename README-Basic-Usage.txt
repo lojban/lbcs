@@ -1,3 +1,12 @@
+Terms
+=====
+
+The entire setup for your project/system/service/whatever is called
+a "bundle"; the directory that has symlink to this file is your
+bundle.  Bundles have one or more containers, and containers have
+zero or more addons.  Containers and addons both run as systemd user
+services.
+
 Run Setup
 =========
 
@@ -74,7 +83,7 @@ journalctl --user anyway.
 The Containers
 --------------
 
-All aspects of the service run inside containers; you can see them
+All aspects of the bundle run inside containers; you can see them
 with "podman ps -a".  If you're like "what the hell is podman?",
 just pretend it's docker and you should be fine.  If you're like
 "what the hell is docker?", you shouldn't be trying to administer
