@@ -74,17 +74,19 @@ MAILTO=$email
 $(shuf -i 0-59 -n 1) */5 * * * <%= maindir %>/rebuild_images.sh
 EOF
 
-    ln -sf /opt/lbcs/README-Basic-Usage.txt
-    ln -sf /opt/lbcs/build_image.sh
-    ln -sf /opt/lbcs/rebuild_images.sh
-    ln -sf /opt/lbcs/cron/cron-run-inside.sh cron/cron-run-inside.sh
-    ln -sf /opt/lbcs/destroy_container.sh
-    ln -sf /opt/lbcs/initial_setup.sh
-    ln -sf /opt/lbcs/run_container.sh
-    ln -sf /opt/lbcs/setup.sh
-
     echo -e "\n\nIf you use SELinux, you should run initial_setup.sh as root, once.\n\n"
 fi
+
+ln -sf /opt/lbcs/README-Basic-Usage.txt
+ln -sf /opt/lbcs/build_image.sh
+ln -sf /opt/lbcs/rebuild_images.sh
+ln -sf /opt/lbcs/cron/cron-run-inside.sh cron/cron-run-inside.sh
+ln -sf /opt/lbcs/destroy_container.sh
+ln -sf /opt/lbcs/initial_setup.sh
+ln -sf /opt/lbcs/run_container.sh
+ln -sf /opt/lbcs/run_addon.sh
+ln -sf /opt/lbcs/stop_addon.sh
+ln -sf /opt/lbcs/setup.sh
 
 . $lbcsdir/config
 . $maindir/config

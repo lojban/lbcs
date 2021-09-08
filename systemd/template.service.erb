@@ -22,10 +22,8 @@ ExecStart=/bin/bash -x <%= maindir %>/run_container.sh <%= container_name %>
 ExecStop=/bin/bash -x <%= maindir %>/destroy_container.sh <%= container_name %>
 <%- end -%>
 <%- if type == 'addon' -%>
-ExecStart=<%= run_program %>
-<%- if defined?(stop_program) -%>
-ExecStop=<%= stop_program %>
-<%- end -%>
+ExecStart=/bin/bash -x <%= maindir %>/run_addon.sh <%= container_name %> <%= addon_name %>
+ExecStop=/bin/bash -x <%= maindir %>/stop_addon.sh <%= container_name %> <%= addon_name %>
 <%- end -%>
 TimeoutStartSec=10min
 
