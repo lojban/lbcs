@@ -71,7 +71,11 @@ then
     # Need the eval to expand variables in $run_args itself; probably a better way
     # to do this but meh
     eval $CONTAINER_BIN exec -it $container $run_program 2>&1
-elif [[ $kill_string ]]
+
+    sleep 5
+fi
+
+if [[ $kill_string ]]
 then
     echo -e "\nStopping addon $name for container $container in bundle $bundle by killing processes that look like '$kill_string'\n"
 
@@ -88,6 +92,8 @@ then
     done
 
     $CONTAINER_BIN exec web pgrep -f "$kill_string" >/dev/null 2>&1 || exit 0
-else
+fi
+
+if [[ -z $stop_program -a -z $kill_string ]]
     echo -e "\nAddon $name for container $container in bundle $bundle has no stop_program or kill_string!  Can't stop it!\n"
 fi

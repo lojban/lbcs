@@ -87,6 +87,28 @@ if type == 'addon'
     files << File.join(addondir, 'secrets')
 end
 
+def getvals(line)
+  stuff = line.split('=', 2)
+  if line =~ %r{^[a-z_].*="}
+    return stuff[0], stuff[1].sub( %r{^"(.*)"$}, '\1' )
+  elsif line =~ %r{^[a-z_].*='}
+    return stuff[0], stuff[1].sub( %r{^'(.*)'$}, '\1' )
+  else
+    return stuff[0], stuff[1]
+  end
+end
+
+# Get a list of the addons
+if type == 'container'
+    addons_arr=[]
+    Dir[File.join(containerdir, 'addons', '*')].each do |addon|
+      line = File.read(File.join(addon, 'config')).lines.grep(%r{^name=}).first
+      stuff = getvals(line)
+      addons_arr << stuff[1]
+    end
+    vals['addons'] = addons_arr.join(' ')
+end
+
 # Now get all the vals from all the config and secrets files
 for varfile in files do
     if File.exist?(varfile)
@@ -96,14 +118,8 @@ for varfile in files do
             # Ruby local variables must start with a lower case letter
             # or underscore.  Also we don't care about lines with no =
             if line =~ %r{^[a-z_].*=}
-                stuff = line.split('=', 2)
-                if line =~ %r{^[a-z_].*="}
-                    vals[stuff[0]] = stuff[1].sub( %r{^"(.*)"$}, '\1' )
-                elsif line =~ %r{^[a-z_].*='}
-                    vals[stuff[0]] = stuff[1].sub( %r{^'(.*)'$}, '\1' )
-                else
-                    vals[stuff[0]] = stuff[1]
-                end
+                stuff = getvals(line)
+                vals[stuff[0]] = stuff[1]
             end
         end
     end

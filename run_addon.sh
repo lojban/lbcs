@@ -74,14 +74,14 @@ after_containers="$after_containers $container"
 
 for after_container in $after_containers
 do
-    for num in $(seq 1 10)
+    for num in $(seq 1 60)
     do
         if [[ $($CONTAINER_BIN container inspect --format '{{.State.Status}}' $after_container) == 'running' ]]
         then
             break
         fi
         echo -e "\nWaiting for required container $after_container to start.\n"
-        sleep 30
+        sleep 5
     done
 
     if [[ $($CONTAINER_BIN container inspect --format '{{.State.Status}}' $after_container) == 'running' ]]

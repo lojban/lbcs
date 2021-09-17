@@ -5,10 +5,12 @@ Description=<%= description %>
     # units is hard, so we actually handle the ordering in the
     # run_container code, but this at least helps somewhat
     # -%>
+Requires=<%- if defined?(after_containers) -%><%= after_containers.split("\s").map { |x| "#{x}.service" }.join(' ') %><%- end %> <% if defined?(addons) -%><%= addons.split("\s").map { |x| "#{x}.service" }.join(' ') %><%- end %> <% if defined?(addon_name) -%><%= container %>.service<%- end %>
+Wants=<%- if defined?(before_containers) -%><%= before_containers.split("\s").map { |x| "#{x}.service" }.join(' ') %><%- end %>
 <%- if defined?(after_containers) -%>
-Requires=<%= after_containers.split("\s").map { |x| "#{x}.service" }.join(' ') %>
-After=<%= after_containers.split("\s").map { |x| "#{x}.service" }.join(' ') %>
+After=<%= after_containers.split("\s").map { |x| "#{x}.service" }.join(' ') %> <% if defined?(addon_name) -%><%= container %>.service<%- end %>
 <%- end -%>
+Before=<%- if defined?(addons) -%><%= addons.split("\s").map { |x| "#{x}.service" }.join(' ') %><%- end %> <% if defined?(before_containers) -%><%= before_containers.split("\s").map { |x| "#{x}.service" }.join(' ') %><%- end %>
 
 [Service]
 Restart=always

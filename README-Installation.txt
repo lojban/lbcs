@@ -156,6 +156,27 @@ or
 
     after_containers=jvs-db
 
+You can also force something to start when its dependencies do.
+Let's say that you take the DB down to fix something, and later you
+bring the DB back up; assuming you've used after_containers in the
+obvious way, that will leave the web container down until you remember to bring
+it up.  If you do this:
+
+    before_containers=web
+
+in the db config and this:
+
+    after_containers=db
+
+in the web config, stopping the db will stop the web, and starting the db will
+start the web.
+
+All addons are treated internally as though they had an after_containers line
+for the container they belong to, and all containers with addons are treated
+internally as if they had before_containers for all their addons.  This means
+that stopping the container stops all the addons, and starting the container
+starts all the addons.
+
 Configuration
 =============
 
