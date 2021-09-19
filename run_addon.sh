@@ -1,7 +1,9 @@
 #!/bin/bash
 
 exec 2>&1
-set -e
+set -o errexit
+set -o nounset
+set -o pipefail
 
 maindir="$(readlink -f "$(dirname "$0")")"
 lbcsdir="$(dirname "$(readlink -f "$0")")"
@@ -35,21 +37,36 @@ then
     exit 1
 fi
 
-. $lbcsdir/config
-. $maindir/config
+# Make shellcheck happy
+name=''
+
+# shellcheck disable=SC1091
+. "$lbcsdir/config"
+# shellcheck disable=SC1091
+. "$maindir/config"
+
 if [[ -f $maindir/secrets ]]
 then
-    . $maindir/secrets
+    # shellcheck disable=SC1091
+    . "$maindir/secrets"
 fi
-. $containerdir/config
+
+# shellcheck disable=SC1091
+. "$containerdir/config"
+
 if [[ -f $containerdir/secrets ]]
 then
-    . $containerdir/secrets
+    # shellcheck disable=SC1091
+    . "$containerdir/secrets"
 fi
-. $addondir/config
+
+# shellcheck disable=SC1091
+. "$addondir/config"
+
 if [[ -f $addondir/secrets ]]
 then
-    . $addondir/secrets
+    # shellcheck disable=SC1091
+    . "$addondir/secrets"
 fi
 
 if [[ ! $bundle ]]
@@ -58,7 +75,7 @@ then
     exit 1
 fi
 
-if [[ $bundle = $name ]]
+if [[ $bundle = "$name" ]]
 then
     echo "The bundle name ($bundle) and the addon name ($name) can't be the same; modify one of the config files to fix please."
     exit 1
@@ -74,9 +91,10 @@ after_containers="$after_containers $container"
 
 for after_container in $after_containers
 do
+    # shellcheck disable=SC2034
     for num in $(seq 1 60)
     do
-        if [[ $($CONTAINER_BIN container inspect --format '{{.State.Status}}' $after_container) == 'running' ]]
+        if [[ $($CONTAINER_BIN container inspect --format '{{.State.Status}}' "$after_container") == 'running' ]]
         then
             break
         fi
@@ -84,7 +102,7 @@ do
         sleep 5
     done
 
-    if [[ $($CONTAINER_BIN container inspect --format '{{.State.Status}}' $after_container) == 'running' ]]
+    if [[ $($CONTAINER_BIN container inspect --format '{{.State.Status}}' "$after_container") == 'running' ]]
     then
         echo -e "\nRequired container $after_container has started.\n"
     else
@@ -100,14 +118,14 @@ then
     for file in $files_to_erb_on_run
     do
         echo "ERBing $maindir/$file.erb to $maindir/$file"
-        $lbcsdir/lbcserb $maindir $lbcsdir $container "$maindir/$file.erb" "$maindir/$file" addon $addon
+        "$lbcsdir/lbcserb" "$maindir" "$lbcsdir" "$container" "$maindir/$file.erb" "$maindir/$file" addon "$addon"
     done
 fi
 
 if [[ $run_pre_script ]]
 then
     echo -e "\nRunning pre-script for addon $addon in container $container\n"
-    bash -c "$(eval $run_pre_script)"
+    bash -c "$(eval "$run_pre_script")"
     echo -e "\nDone running pre-script for addon $addon in container $container\n"
 fi
 
@@ -115,11 +133,11 @@ echo -e "\nRunning addon $name for container $container in bundle $bundle\n"
 
 # Need the eval to expand variables in $run_args itself; probably a better way
 # to do this but meh
-eval $CONTAINER_BIN exec -it $container $run_program 2>&1
+eval "$CONTAINER_BIN" exec -it "$container" "$run_program" 2>&1
 
 if [[ $run_post_script ]]
 then
     echo -e "\nRunning post-script for addon $addon in container $container\n"
-    bash -c "$run_post_script"
+    bash -c "$(eval "$run_post_script")"
     echo -e "\nDone running post-script for addon $addon in container $container\n"
 fi

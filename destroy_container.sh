@@ -1,7 +1,9 @@
 #!/bin/bash
 
 exec 2>&1
-set -e
+set -o errexit
+set -o nounset
+set -o pipefail
 
 maindir="$(readlink -f "$(dirname "$0")")"
 lbcsdir="$(dirname "$(readlink -f "$0")")"
@@ -21,9 +23,15 @@ then
     exit 1
 fi
 
-. $lbcsdir/config
-. $maindir/config
-. $containerdir/config
+# Make shellcheck happy
+name=''
+
+# shellcheck disable=SC1091
+. "$lbcsdir/config"
+# shellcheck disable=SC1091
+. "$maindir/config"
+# shellcheck disable=SC1091
+. "$containerdir/config"
 
 status="$($CONTAINER_BIN ps -a -f name="^$name$" --format '{{.ID}} {{.Status}}')"
 
@@ -32,16 +40,16 @@ pat='^[0-9a-f][0-9a-f]* Up'
 if [[ $status =~ $pat ]]
 then
     echo -e "\nTrying to stop container $name\n"
-    $CONTAINER_BIN stop --time=30 $name || true
+    $CONTAINER_BIN stop --time=30 "$name" || true
     echo -e "\nTrying to kill container $name\n"
-    $CONTAINER_BIN kill $name || true
+    $CONTAINER_BIN kill "$name" || true
 fi
 
 # If it exists at all, try to remove it
 if [[ $status ]]
 then
     echo -e "\nTrying to delete container $name\n"
-    $CONTAINER_BIN rm $name || true
+    $CONTAINER_BIN rm "$name" || true
 fi
 
 if [[ $($CONTAINER_BIN ps -a -f name="^$name$" --format '{{.ID}} {{.Status}}' | wc -l) -eq 0 ]]

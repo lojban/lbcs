@@ -3,7 +3,9 @@
 shopt -s nullglob
 
 exec 2>&1
-set -e
+set -o errexit
+set -o nounset
+set -o pipefail
 
 maindir="$(readlink -f "$(dirname "$0")")"
 lbcsdir="$(dirname "$(readlink -f "$0")")"
@@ -23,9 +25,12 @@ then
     exit 1
 fi
 
-. $lbcsdir/config
-. $maindir/config
-. $containerdir/config
+# shellcheck disable=SC1091
+. "$lbcsdir/config"
+# shellcheck disable=SC1091
+. "$maindir/config"
+# shellcheck disable=SC1091
+. "$containerdir/config"
 
 if [[ ! $version ]]
 then
@@ -39,25 +44,23 @@ then
     exit 1
 fi
 
-for file in $maindir/misc/*.erb
+for file in "$maindir/misc"/*.erb
 do
     echo -e "\nERBing misc (build-time) files: $file\n" 
 
-    $lbcsdir/lbcserb $maindir $lbcsdir $container "$file" "$( echo "$file" | sed 's/\.erb$//')" container userid=$(id -u) groupid=$(id -g)
+    "$lbcsdir/lbcserb" "$maindir" "$lbcsdir" "$container" "$file" "${file%.erb}" container "userid=$(id -u)" "groupid=$(id -g)"
 done
 
-mkdir -p $containerdir/tmp
+mkdir -p "$containerdir/tmp"
 
-$lbcsdir/lbcserb $maindir $lbcsdir $container $containerdir/Dockerfile.erb $containerdir/tmp/Dockerfile.$$ container userid=$(id -u) groupid=$(id -g)
+"$lbcsdir/lbcserb" "$maindir" "$lbcsdir" "$container" "$containerdir/Dockerfile.erb" "$containerdir/tmp/Dockerfile.$$" container "userid=$(id -u)" "groupid=$(id -g)"
 
-cd $maindir
+cd "$maindir"
 
-$CONTAINER_BIN build -t $(id -un)/$bundle-$container:$version --quiet=false -f $containerdir/tmp/Dockerfile.$$ .
-
-if [[ $? -ne 0 ]]
+if ! $CONTAINER_BIN build -t "$(id -un)/$bundle-$container:$version" --quiet=false -f "$containerdir/tmp/Dockerfile.$$" .
 then
     echo "Docker build failed."
     exit 1
 fi
 
-rm -rf $containerdir/tmp
+rm -rf "$containerdir/tmp"

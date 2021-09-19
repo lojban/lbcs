@@ -1,7 +1,9 @@
 #!/bin/bash
 
 exec 2>&1
-set -e
+set -o errexit
+set -o nounset
+set -o pipefail
 
 maindir="$(readlink -f "$(dirname "$0")")"
 lbcsdir="$(dirname "$(readlink -f "$0")")"
@@ -21,16 +23,27 @@ then
     exit 1
 fi
 
-. $lbcsdir/config
-. $maindir/config
+# Make shellcheck happy
+name=''
+run_program=''
+
+# shellcheck disable=SC1091
+. "$lbcsdir/config"
+# shellcheck disable=SC1091
+. "$maindir/config"
 if [[ -f $maindir/secrets ]]
 then
-    . $maindir/secrets
+    # shellcheck disable=SC1091
+    . "$maindir/secrets"
 fi
-. $containerdir/config
+
+# shellcheck disable=SC1091
+. "$containerdir/config"
+
 if [[ -f $containerdir/secrets ]]
 then
-    . $containerdir/secrets
+    # shellcheck disable=SC1091
+    . "$containerdir/secrets"
 fi
 
 if [[ ! $version ]]
@@ -57,15 +70,15 @@ then
     exit 1
 fi
 
-if [[ $bundle = $name ]]
+if [[ $bundle = "$name" ]]
 then
     echo "The bundle name ($bundle) and the container name ($name) can't be the same; modify one of the config files to fix please."
     exit 1
 fi
 
-$maindir/destroy_container.sh $container
+"$maindir/destroy_container.sh" "$container"
 
-$maindir/build_image.sh $container
+"$maindir/build_image.sh" "$container"
 
 hasterm=''
 if tty -s
@@ -78,29 +91,30 @@ fi
 #
 # If there's only one container in the pod, that's the
 # infrastructure container (or it's broken)
-if [[ $($CONTAINER_BIN pod inspect $bundle | jq -r '.Containers | .[].State' | grep '^running$' | wc -l) -le 1 ]]
+if [[ $($CONTAINER_BIN pod inspect "$bundle" | jq -r '.Containers | .[].State' | grep -c '^running$') -le 1 ]]
 then
-    $CONTAINER_BIN pod rm $bundle || true
+    $CONTAINER_BIN pod rm "$bundle" || true
 fi
 
 # Create a pod so that only the other containers in the pod (i.e. the web
 # server) can see private things (i.e. the database)
-if $CONTAINER_BIN pod exists $bundle
+if $CONTAINER_BIN pod exists "$bundle"
 then
     echo -e "\nPod $bundle already exists\n"
 else
-    $CONTAINER_BIN pod rm $bundle || true
+    $CONTAINER_BIN pod rm "$bundle" || true
     echo -e "\nCreating pod $bundle\n"
-    $CONTAINER_BIN pod create --share=net -n $bundle $pod_args
+    $CONTAINER_BIN pod create --share=net -n "$bundle" "$pod_args"
 fi
 
 if [[ $after_containers ]]
 then
     for after_container in $after_containers
     do
+        # shellcheck disable=SC2034
         for num in $(seq 1 10)
         do
-            if [[ $($CONTAINER_BIN container inspect --format '{{.State.Status}}' $after_container) == 'running' ]]
+            if [[ $($CONTAINER_BIN container inspect --format '{{.State.Status}}' "$after_container") == 'running' ]]
             then
                 break
             fi
@@ -108,7 +122,7 @@ then
             sleep 30
         done
 
-        if [[ $($CONTAINER_BIN container inspect --format '{{.State.Status}}' $after_container) == 'running' ]]
+        if [[ $($CONTAINER_BIN container inspect --format '{{.State.Status}}' "$after_container") == 'running' ]]
         then
             echo -e "\nRequired container $after_container has started.\n"
         else
@@ -125,14 +139,14 @@ then
     for file in $files_to_erb_on_run
     do
         echo "ERBing $maindir/$file.erb to $maindir/$file"
-        $lbcsdir/lbcserb $maindir $lbcsdir $container "$maindir/$file.erb" "$maindir/$file" container
+        "$lbcsdir/lbcserb" "$maindir" "$lbcsdir" "$container" "$maindir/$file.erb" "$maindir/$file" container
     done
 fi
 
 if [[ $run_pre_script ]]
 then
     echo -e "\nRunning pre-script for container $container\n"
-    bash -c "$(eval $run_pre_script)"
+    bash -c "$(eval "$run_pre_script")"
     echo -e "\nDone running pre-script for container $container\n"
 fi
 
@@ -146,13 +160,13 @@ fi
 
 # Need the eval to expand variables in $run_args itself; probably a better way
 # to do this but meh
-eval $CONTAINER_BIN run --pod=$bundle $userns --name $name \
-    $run_args \
-    -i $hasterm $(id -un)/$bundle-$container:$version $run_program 2>&1
+eval "$CONTAINER_BIN" run "--pod=$bundle" "$userns" --name "$name" \
+    "$run_args" \
+    -i "$hasterm" "$(id -un)/$bundle-$container:$version" "$run_program" 2>&1
 
 if [[ $run_post_script ]]
 then
     echo -e "\nRunning post-script for container $container\n"
-    bash -c "$run_post_script"
+    bash -c "$(eval "$run_post_script")"
     echo -e "\nDone running post-script for container $container\n"
 fi
