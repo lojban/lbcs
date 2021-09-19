@@ -10,14 +10,14 @@ set -o pipefail
 maindir="$(readlink -f "$(dirname "$0")")"
 lbcsdir="$(dirname "$(readlink -f "$0")")"
 
-container="$1"
-containerdir="$maindir/containers/$container"
-
-if [[ ! $container ]]
+if [[ ! $1 ]]
 then
     echo "Need container name as single argument."
     exit 1
 fi
+
+container="$1"
+containerdir="$maindir/containers/$container"
 
 if [[ ! -d $containerdir ]]
 then

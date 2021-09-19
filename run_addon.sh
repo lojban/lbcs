@@ -8,26 +8,26 @@ set -o pipefail
 maindir="$(readlink -f "$(dirname "$0")")"
 lbcsdir="$(dirname "$(readlink -f "$0")")"
 
-container="$1"
-containerdir="$maindir/containers/$container"
-addon="$2"
-addondir="$containerdir/addons/$addon"
-
-if [[ ! $container ]]
+if [[ ! $1 ]]
 then
     echo "Need container name as first argument."
     exit 1
 fi
 
-if [[ ! -d $containerdir ]]
+if [[ ! $2 ]]
 then
-    echo "Can't find container dir $containerdir"
+    echo "Need addon name as second argument."
     exit 1
 fi
 
-if [[ ! $addon ]]
+container="$1"
+containerdir="$maindir/containers/$container"
+addon="$2"
+addondir="$containerdir/addons/$addon"
+
+if [[ ! -d $containerdir ]]
 then
-    echo "Need addon name as second argument."
+    echo "Can't find container dir $containerdir"
     exit 1
 fi
 
