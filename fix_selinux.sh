@@ -1,8 +1,11 @@
 #!/bin/bash
 
 set -o errexit
+set -o errtrace
 set -o nounset
 set -o pipefail
+
+trap 'echo -e "\n\nExited due to script error! Exit value: $?\n\n"' ERR
 
 chcon -R -t systemd_unit_file_t systemd/
 if ! loginctl show-user "$(id -un)" | grep -q Linger=yes

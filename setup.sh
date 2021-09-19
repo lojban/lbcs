@@ -2,8 +2,11 @@
 
 shopt -s nullglob
 set -o errexit
+set -o errtrace
 set -o nounset
 set -o pipefail
+
+trap 'echo -e "\n\nExited due to script error! Exit value: $?\n\n"' ERR
 
 maindir="$(readlink -f "$(dirname "$0")")"
 lbcsdir="$(dirname "$(readlink -f "$0")")"
@@ -89,6 +92,7 @@ ln -sf /opt/lbcs/initial_setup.sh .
 ln -sf /opt/lbcs/run_container.sh .
 ln -sf /opt/lbcs/run_addon.sh .
 ln -sf /opt/lbcs/stop_addon.sh .
+ln -sf /opt/lbcs/self_backup.sh .
 ln -sf /opt/lbcs/setup.sh .
 
 # shellcheck disable=SC1091

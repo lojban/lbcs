@@ -4,7 +4,10 @@ shopt -s nullglob
 
 exec 2>&1
 set -o errexit
+set -o errtrace
 set -o pipefail
+
+trap 'echo -e "\n\nExited due to script error! Exit value: $?\n\n"' ERR
 
 maindir="$(readlink -f "$(dirname "$0")")"
 lbcsdir="$(dirname "$(readlink -f "$0")")"
