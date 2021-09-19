@@ -69,7 +69,7 @@ then
     . "$addondir/secrets"
 fi
 
-if [[ ! $bundle ]]
+if [[ ! ${bundle-} ]]
 then
     echo "No bundle name (tag 'bundle') found in $maindir/config  ; please set.  (Used to be called 'service'.)"
     exit 1
@@ -81,7 +81,7 @@ then
     exit 1
 fi
 
-if [[ $stop_program ]]
+if [[ ${stop_program-} ]]
 then
     echo -e "\nStopping addon $name for container $container in bundle $bundle\n"
 
@@ -92,7 +92,7 @@ then
     sleep 5
 fi
 
-if [[ $kill_string ]]
+if [[ ${kill_string-} ]]
 then
     echo -e "\nStopping addon $name for container $container in bundle $bundle by killing processes that look like '$kill_string'\n"
 
@@ -112,7 +112,7 @@ then
     "$CONTAINER_BIN" exec web pgrep -f "$kill_string" >/dev/null 2>&1 || exit 0
 fi
 
-if [[ -z $stop_program && -z $kill_string ]]
+if [[ -z ${stop_program-} && -z ${kill_string-} ]]
 then
     echo -e "\nAddon $name for container $container in bundle $bundle has no stop_program or kill_string!  Can't stop it!\n"
 fi

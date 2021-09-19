@@ -105,7 +105,7 @@ then
     . "$maindir/secrets"
 fi
 
-if [[ ! $bundle ]]
+if [[ ! ${bundle-} ]]
 then
     echo "No bundle name (tag 'bundle') found in $maindir/config  ; please set.  (Used to be called 'service'.)"
     exit 1
@@ -152,7 +152,7 @@ for container in $(ls -1 containers/)
 do
     # shellcheck disable=SC1091,SC1090
     . "containers/$container/config"
-    if [[ ! $name ]]
+    if [[ ! ${name-} ]]
     then
         echo "Can't find name for container $container in containers/$container/config; bailing setup."
         exit 1
