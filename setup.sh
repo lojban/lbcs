@@ -177,7 +177,7 @@ then
         echo -e "\n\nNo crontab changes.\n\n"
     else
         echo -e "\n\nFound crontab changes:\n\n"
-        diff <(crontab -l) "$maindir/cron/crontab"
+        diff <(crontab -l) "$maindir/cron/crontab" || true
         echo -e "\n\nUpdating crontab.\n\n"
         crontab "$maindir/cron/crontab"
     fi
