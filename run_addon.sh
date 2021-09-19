@@ -2,7 +2,6 @@
 
 exec 2>&1
 set -o errexit
-set -o nounset
 set -o pipefail
 
 maindir="$(readlink -f "$(dirname "$0")")"
@@ -24,6 +23,8 @@ container="$1"
 containerdir="$maindir/containers/$container"
 addon="$2"
 addondir="$containerdir/addons/$addon"
+
+set -o nounset
 
 if [[ ! -d $containerdir ]]
 then

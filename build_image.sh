@@ -4,7 +4,6 @@ shopt -s nullglob
 
 exec 2>&1
 set -o errexit
-set -o nounset
 set -o pipefail
 
 maindir="$(readlink -f "$(dirname "$0")")"
@@ -18,6 +17,8 @@ fi
 
 container="$1"
 containerdir="$maindir/containers/$container"
+
+set -o nounset
 
 if [[ ! -d $containerdir ]]
 then
