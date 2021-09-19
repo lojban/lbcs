@@ -4,19 +4,20 @@ exec 2>&1
 set -o errexit
 set -o errtrace
 set -o pipefail
+set -o nounset
 
 trap 'echo -e "\n\nExited due to script error! Exit value: $?\n\n"' ERR
 
 maindir="$(readlink -f "$(dirname "$0")")"
 lbcsdir="$(dirname "$(readlink -f "$0")")"
 
-if [[ ! $1 ]]
+if [[ ! ${1-} ]]
 then
     echo "Need container name as first argument."
     exit 1
 fi
 
-if [[ ! $2 ]]
+if [[ ! ${2-} ]]
 then
     echo "Need addon name as second argument."
     exit 1
@@ -26,8 +27,6 @@ container="$1"
 containerdir="$maindir/containers/$container"
 addon="$2"
 addondir="$containerdir/addons/$addon"
-
-set -o nounset
 
 if [[ ! -d $containerdir ]]
 then
@@ -43,6 +42,7 @@ fi
 
 # Make shellcheck happy
 name=''
+run_program=''
 
 # shellcheck disable=SC1091
 . "$lbcsdir/config"
@@ -73,7 +73,7 @@ then
     . "$addondir/secrets"
 fi
 
-if [[ ! $bundle ]]
+if [[ ! ${bundle-} ]]
 then
     echo "No bundle name (tag 'bundle') found in $maindir/config  ; please set.  (Used to be called 'service'.)"
     exit 1
@@ -85,7 +85,7 @@ then
     exit 1
 fi
 
-if [[ ! $run_program ]]
+if [[ ! ${run_program-} ]]
 then
     echo "No addon run program (tag 'run_program') found in $addondir/config ; there's no point in having an addon without one."
     exit 1
@@ -115,7 +115,7 @@ do
     fi
 done
 
-if [[ $files_to_erb_on_run ]]
+if [[ ${files_to_erb_on_run-} ]]
 then
     echo -e "\nERBing runtime files\n"
 
@@ -126,7 +126,7 @@ then
     done
 fi
 
-if [[ $run_pre_script ]]
+if [[ ${run_pre_script-} ]]
 then
     echo -e "\nRunning pre-script for addon $addon in container $container\n"
     bash -c "$(eval "$run_pre_script")"
@@ -139,7 +139,7 @@ echo -e "\nRunning addon $name for container $container in bundle $bundle\n"
 # to do this but meh
 eval "$CONTAINER_BIN" exec -it "$container" "$run_program" 2>&1
 
-if [[ $run_post_script ]]
+if [[ ${run_post_script-} ]]
 then
     echo -e "\nRunning post-script for addon $addon in container $container\n"
     bash -c "$(eval "$run_post_script")"

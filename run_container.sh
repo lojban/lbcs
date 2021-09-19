@@ -4,13 +4,14 @@ exec 2>&1
 set -o errexit
 set -o errtrace
 set -o pipefail
+set -o nounset
 
 trap 'echo -e "\n\nExited due to script error! Exit value: $?\n\n"' ERR
 
 maindir="$(readlink -f "$(dirname "$0")")"
 lbcsdir="$(dirname "$(readlink -f "$0")")"
 
-if [[ ! $1 ]]
+if [[ ! ${1-} ]]
 then
     echo "Need container name as single argument."
     exit 1
@@ -18,8 +19,6 @@ fi
 
 container="$1"
 containerdir="$maindir/containers/$container"
-
-set -o nounset
 
 if [[ ! -d $containerdir ]]
 then
@@ -50,25 +49,25 @@ then
     . "$containerdir/secrets"
 fi
 
-if [[ ! $version ]]
+if [[ ! ${version-} ]]
 then
     echo "No version (tag 'version') found in $containerdir/config ; please set. You can increment the version to force a rebuild of the docker container."
     exit 1
 fi
 
-if [[ ! $bundle ]]
+if [[ ! ${bundle-} ]]
 then
     echo "No bundle name (tag 'bundle') found in $maindir/config  ; please set.  (Used to be called 'service'.)"
     exit 1
 fi
 
-if [[ ! $pod_args ]]
+if [[ ! ${pod_args-} ]]
 then
     echo "No pod arguments (tag 'pod_args') found in $maindir/config ; I am skeptical that your pod does not need even a '-p 1234' argument."
     exit 1
 fi
 
-if [[ ! $run_args ]]
+if [[ ! ${run_args-} ]]
 then
     echo "No container run arguments (tag 'run_args') found in $containerdir/config ; I am skeptical that your pod does not need even a '-v datadir:/data' argument."
     exit 1
@@ -108,10 +107,11 @@ then
 else
     $CONTAINER_BIN pod rm "$bundle" || true
     echo -e "\nCreating pod $bundle\n"
-    $CONTAINER_BIN pod create --share=net -n "$bundle" "$pod_args"
+    # shellcheck disable=SC2086
+    $CONTAINER_BIN pod create --share=net -n "$bundle" $pod_args
 fi
 
-if [[ $after_containers ]]
+if [[ ${after_containers-} ]]
 then
     for after_container in $after_containers
     do
@@ -136,7 +136,7 @@ then
     done
 fi
 
-if [[ $files_to_erb_on_run ]]
+if [[ ${files_to_erb_on_run-} ]]
 then
     echo -e "\nERBing runtime files\n"
 
@@ -147,7 +147,7 @@ then
     done
 fi
 
-if [[ $run_pre_script ]]
+if [[ ${run_pre_script-} ]]
 then
     echo -e "\nRunning pre-script for container $container\n"
     bash -c "$(eval "$run_pre_script")"
@@ -157,7 +157,7 @@ fi
 echo -e "\nRunning container $name for bundle $bundle\n"
 
 userns="--userns=keep-id"
-if [[ $no_userns ]]
+if [[ ${no_userns-} ]]
 then
   userns=""
 fi
@@ -168,7 +168,7 @@ eval "$CONTAINER_BIN" run "--pod=$bundle" "$userns" --name "$name" \
     "$run_args" \
     -i "$hasterm" "$(id -un)/$bundle-$container:$version" "$run_program" 2>&1
 
-if [[ $run_post_script ]]
+if [[ ${run_post_script-} ]]
 then
     echo -e "\nRunning post-script for container $container\n"
     bash -c "$(eval "$run_post_script")"
