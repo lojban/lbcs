@@ -60,7 +60,7 @@ set -x
 ssh "$dest" mkdir -p "${BACKUP_DIR}"
 
 date
-rsync -a -SHAX --delete \
+rsync -a -SHA --delete \
   "$HOME/" \
   --link-dest "../latest" \
   --exclude=".cache" \
