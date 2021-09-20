@@ -122,6 +122,7 @@ mkdir -p ~/.config/systemd/user/default.target.wants
 for container in $(ls -1 containers/)
 do
     (
+        containerdir="containers/$container/"
         # shellcheck disable=SC1091,SC1090
         . "containers/$container/config"
         "$lbcsdir/lbcserb" "$maindir" "$lbcsdir" "$container" "$lbcsdir/systemd/template.service.erb" "$HOME/.config/systemd/user/$name.service" container
@@ -134,6 +135,7 @@ do
         for addon in $(ls -1 "containers/$container/addons/")
         do
             (
+                addondir="containers/$container/addons/$addon/"
                 # shellcheck disable=SC1091,SC1090
                 . "containers/$container/addons/$addon/config"
                 "$lbcsdir/lbcserb" "$maindir" "$lbcsdir" "$container" "$lbcsdir/systemd/template.service.erb" "$HOME/.config/systemd/user/$name.service" addon "$addon"
@@ -151,6 +153,7 @@ systemctl --user daemon-reload
 # shellcheck disable=SC2045
 for container in $(ls -1 containers/)
 do
+    containerdir="containers/$container/"
     # shellcheck disable=SC1091,SC1090
     . "containers/$container/config"
     if [[ ! ${name-} ]]
