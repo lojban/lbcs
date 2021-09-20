@@ -69,5 +69,5 @@ rsync -a -SHAX --delete \
 date
 
 # shellcheck disable=SC2029
-ssh "$dest" rm "${LATEST_LINK}"
+ssh "$dest" rm "${LATEST_LINK}" || true
 ssh "$dest" ln -s "${DATETIME}" "${LATEST_LINK}"
