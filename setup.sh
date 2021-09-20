@@ -93,6 +93,7 @@ ln -sf /opt/lbcs/run_container.sh .
 ln -sf /opt/lbcs/run_addon.sh .
 ln -sf /opt/lbcs/stop_addon.sh .
 ln -sf /opt/lbcs/self_backup.sh .
+ln -sf /opt/lbcs/self_restore_test.sh .
 ln -sf /opt/lbcs/setup.sh .
 
 # shellcheck disable=SC1091
