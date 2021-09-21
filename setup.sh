@@ -183,7 +183,9 @@ then
         echo -e "\n\nFound crontab changes:\n\n"
         diff <(crontab -l) "$maindir/cron/crontab" || true
         echo -e "\n\nUpdating crontab.\n\n"
-        crontab "$maindir/cron/crontab"
+        # We have to do it with the cat to avoid selinux fun
+        # shellcheck disable=SC2002
+        cat "$maindir/cron/crontab" | crontab -
     fi
 else
     echo -e '\n\n*** ERROR: crontab does not appear to be LBCS generated; cowardly refusing to overwrite.\n\n'
