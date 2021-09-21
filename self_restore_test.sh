@@ -30,9 +30,6 @@ email="$1"
 shift
 
 BACKUP_DIR="backups/$(id -un)"
-DATETIME="$(date '+%j')"
-BACKUP_PATH="${BACKUP_DIR}/${DATETIME}"
-LATEST_LINK="${BACKUP_DIR}/latest"
 
 # Get a count of all backups in the last 5 days
 fivedaycount=$(ssh "$dest" find "${BACKUP_DIR}/" -depth 1 -mtime -5 | grep -cv '/latest$')
@@ -63,11 +60,11 @@ rsync -lptgod "$dest:${BACKUP_DIR}/$randombackup" "$tmp_dir/"
 echo
 echo
 
-backupdate="$(stat -c %y $tmp_dir/$randombackup | sed 's/ .*//' | tr -d '-')"
+backupdate="$(stat -c %y "$tmp_dir/$randombackup" | sed 's/ .*//' | tr -d '-')"
 restorefile="$tmp_dir/.rsync-restore-test-$backupdate"
-restorefiledate="$(cat $restorefile || echo 'NO RESTORE TEST FILE FOUND')"
+restorefiledate="$(cat "$restorefile" || echo 'NO RESTORE TEST FILE FOUND')"
 
-if [[ $backupdate = $restorefiledate ]]
+if [[ $backupdate = "$restorefiledate" ]]
 then
   echo "Looks good; backup directory and test file both have dates of $backupdate."
   echo
@@ -78,4 +75,4 @@ else
   exit 1
 fi
 
-rm -rf $tmp_dir/
+rm -rf "${tmp_dir:?}/"

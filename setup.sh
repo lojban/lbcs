@@ -122,6 +122,7 @@ mkdir -p ~/.config/systemd/user/default.target.wants
 for container in $(ls -1 containers/)
 do
     (
+        # shellcheck disable=SC2034
         containerdir="containers/$container/"
         # shellcheck disable=SC1091,SC1090
         . "containers/$container/config"
@@ -135,6 +136,7 @@ do
         for addon in $(ls -1 "containers/$container/addons/")
         do
             (
+                # shellcheck disable=SC2034
                 addondir="containers/$container/addons/$addon/"
                 # shellcheck disable=SC1091,SC1090
                 . "containers/$container/addons/$addon/config"
@@ -153,6 +155,7 @@ systemctl --user daemon-reload
 # shellcheck disable=SC2045
 for container in $(ls -1 containers/)
 do
+    # shellcheck disable=SC2034
     containerdir="containers/$container/"
     # shellcheck disable=SC1091,SC1090
     . "containers/$container/config"
