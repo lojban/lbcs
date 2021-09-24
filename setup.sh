@@ -195,7 +195,7 @@ else
 fi
 
 echo -e "\nChecking for template output ignores"
-find "$maindir/" $template_find -type f -name '*.erb' -print >"/tmp/toi.$$"
+find "$maindir/" ${template_find-} -type f -name '*.erb' -print >"/tmp/toi.$$"
 # shellcheck disable=SC2002
 if [[ $(cat "/tmp/toi.$$" | wc -l) -eq 0 ]]
 then
