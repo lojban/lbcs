@@ -86,7 +86,7 @@ fi
 ln -sf /opt/lbcs/README-Basic-Usage.txt .
 ln -sf /opt/lbcs/build_image.sh .
 ln -sf /opt/lbcs/rebuild_images.sh .
-ln -sf /opt/lbcs/cron/cron-run-inside.sh cron/cron-run-inside.sh .
+ln -sf /opt/lbcs/cron/cron-run-inside.sh cron/cron-run-inside.sh
 ln -sf /opt/lbcs/destroy_container.sh .
 ln -sf /opt/lbcs/initial_setup.sh .
 ln -sf /opt/lbcs/run_container.sh .
