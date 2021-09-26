@@ -9,7 +9,11 @@ set -o errtrace
 set -o pipefail
 set -o nounset
 
-trap 'echo -e "\n\nExited due to script error! Exit value: $?\n\n"' ERR
+trap 'exitval=$?
+if [[ $exitval -ne 0 ]]
+then
+  echo -e "\n\nExited due to script error! Exit value: $exitval\n\n" | tee | mailx -s "**** RESTORE TEST FAILED FOR $(id -un)!!!" "$email"
+fi' ERR EXIT
 
 if [[ ! ${1-} ]]
 then
