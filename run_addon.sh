@@ -43,6 +43,7 @@ fi
 # Make shellcheck happy
 name=''
 run_program=''
+after_containers=''
 
 # shellcheck disable=SC1091
 . "$lbcsdir/config"
