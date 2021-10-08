@@ -36,7 +36,7 @@ shift
 BACKUP_DIR="backups/$(id -un)"
 
 # Get a count of all backups in the last 5 days
-fivedaycount=$(ssh "$dest" find "${BACKUP_DIR}/" -maxdepth 1 -mtime -5 | grep -cv '/latest$')
+fivedaycount=$(ssh "$dest" find "${BACKUP_DIR}/" -mindepth 1 -maxdepth 1 -mtime -5 | grep -cv '/latest$')
 
 if [[ $fivedaycount -gt 2 ]]
 then
@@ -50,7 +50,7 @@ fi
 
 # NOTE: Best way I've found to get a timestamp from rsync.net: ls -l -c -D epoch=%s backups/spvlasisku/262
 
-randombackup=$(ssh "$dest" find "${BACKUP_DIR}/" -maxdepth 1 -mtime -5 | grep -v '/latest$' | shuf | head -n 1 | sed 's;.*/;;')
+randombackup=$(ssh "$dest" find "${BACKUP_DIR}/" -mindepth 1 -maxdepth 1 -mtime -5 | grep -v '/latest$' | shuf | head -n 1 | sed 's;.*/;;')
 
 echo
 echo "Pulling test file from random backup $randombackup."
