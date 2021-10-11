@@ -107,8 +107,15 @@ then
 else
     $CONTAINER_BIN pod rm "$bundle" || true
     echo -e "\nCreating pod $bundle\n"
+
+    userns="--userns=keep-id"
+    if [[ ${no_userns-} ]]
+    then
+      userns=""
+    fi
+
     # shellcheck disable=SC2086
-    $CONTAINER_BIN pod create --share=net -n "$bundle" $pod_args
+    $CONTAINER_BIN pod create --share=net "$userns" -n "$bundle" $pod_args
 fi
 
 if [[ ${after_containers-} ]]
@@ -156,15 +163,9 @@ fi
 
 echo -e "\nRunning container $name for bundle $bundle\n"
 
-userns="--userns=keep-id"
-if [[ ${no_userns-} ]]
-then
-  userns=""
-fi
-
 # Need the eval to expand variables in $run_args itself; probably a better way
 # to do this but meh
-eval "$CONTAINER_BIN" run "--pod=$bundle" "$userns" --name "$name" \
+eval "$CONTAINER_BIN" run "--pod=$bundle" --name "$name" \
     "$run_args" \
     -i "$hasterm" "$(id -un)/$bundle-$container:$version" "$run_program" 2>&1
 
