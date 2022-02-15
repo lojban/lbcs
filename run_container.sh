@@ -114,8 +114,13 @@ else
       userns=""
     fi
 
+    # The port_handler=slirp4netns part here is to preserve source
+    # IP info, at a slight cost in performance.
+    #
+    # The mtu=30000 part here is due to https://github.com/rootless-containers/slirp4netns/issues/284
+    #
     # shellcheck disable=SC2086
-    $CONTAINER_BIN pod create --share=net "$userns" -n "$bundle" $pod_args
+    $CONTAINER_BIN pod create --share=net --network slirp4netns:mtu=30000,port_handler=slirp4netns "$userns" -n "$bundle" $pod_args
 fi
 
 if [[ ${after_containers-} ]]
