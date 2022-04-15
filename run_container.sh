@@ -170,7 +170,10 @@ echo -e "\nRunning container $name for bundle $bundle\n"
 
 # Need the eval to expand variables in $run_args itself; probably a better way
 # to do this but meh
-eval "$CONTAINER_BIN" run "--pod=$bundle" --name "$name" \
+#
+# --log-driver=none is because we're logging via systemd already; if
+# we have podman do it as well we get double logging in journalctl
+eval "$CONTAINER_BIN" run "--pod=$bundle" --log-driver=none --name "$name" \
     "$run_args" \
     -i "$hasterm" "$(id -un)/$bundle-$container:$version" "$run_program" 2>&1
 

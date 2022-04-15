@@ -61,6 +61,7 @@ vals['lbcsdir']=lbcsdir
 vals['containerdir']=containerdir
 vals['container']=container
 vals['container_name']=container
+vals['user']=%x{id -un}.strip
 if type == 'addon'
     vals['addondir']=addondir
     vals['addon']=addon
