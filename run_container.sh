@@ -29,6 +29,7 @@ fi
 # Make shellcheck happy
 name=''
 run_program=''
+pod_slirp4netns_extras=''
 
 # shellcheck disable=SC1091
 . "$lbcsdir/config"
@@ -120,7 +121,7 @@ else
     # The mtu=30000 part here is due to https://github.com/rootless-containers/slirp4netns/issues/284
     #
     # shellcheck disable=SC2086
-    $CONTAINER_BIN pod create --share=net --network slirp4netns:mtu=30000,port_handler=slirp4netns "$userns" -n "$bundle" $pod_args
+    $CONTAINER_BIN pod create --share=net --network slirp4netns:mtu=30000,port_handler=slirp4netns$pod_slirp4netns_extras $userns -n "$bundle" $pod_args
 fi
 
 if [[ ${after_containers-} ]]
