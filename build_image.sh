@@ -1,27 +1,30 @@
 #!/bin/bash
 
-shopt -s nullglob
+# Error trapping from https://gist.github.com/oldratlee/902ad9a398affca37bfcfab64612e7d1
+__error_trapper() {
+  local parent_lineno="$1"
+  local code="$2"
+  local commands="$3"
+  echo "error exit status $code, at file $0 on or near line $parent_lineno: $commands"
+}
+trap '__error_trapper "${LINENO}/${BASH_LINENO}" "$?" "$BASH_COMMAND"' ERR
+
+set -euE -o pipefail
+shopt -s failglob
 
 exec 2>&1
-set -o errexit
-set -o errtrace
-set -o pipefail
-
-trap 'echo -e "\n\nExited due to script error! Exit value: $?\n\n"' ERR
 
 maindir="$(readlink -f "$(dirname "$0")")"
 lbcsdir="$(dirname "$(readlink -f "$0")")"
 
-if [[ ! $1 ]]
+if [[ ! ${1-} ]]
 then
     echo "Need container name as single argument."
     exit 1
 fi
 
-container="$1"
+container="${1-}"
 containerdir="$maindir/containers/$container"
-
-set -o nounset
 
 if [[ ! -d $containerdir ]]
 then
@@ -48,12 +51,17 @@ then
     exit 1
 fi
 
-for file in "$maindir/misc"/*.erb
-do
-    echo -e "\nERBing misc (build-time) files: $file\n" 
+# Use find here to avoid failglob
+if [[ -d "$maindir/misc" ]]
+then
+    # shellcheck disable=SC2044
+    for file in $(find "$maindir/misc" -name '*.erb')
+    do
+        echo -e "\nERBing misc (build-time) files: $file\n" 
 
-    "$lbcsdir/lbcserb" "$maindir" "$lbcsdir" "$container" "$file" "${file%.erb}" container "userid=$(id -u)" "groupid=$(id -g)"
-done
+        "$lbcsdir/lbcserb" "$maindir" "$lbcsdir" "$container" "$file" "${file%.erb}" container "userid=$(id -u)" "groupid=$(id -g)"
+    done
+fi
 
 mkdir -p "$containerdir/tmp"
 

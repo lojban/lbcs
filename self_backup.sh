@@ -16,13 +16,19 @@
 #       # Daily restore test
 #       5 5 * * * <%= maindir %>/self_restore_test.sh account@account.rsync.net webmaster@lojban.org
 
-exec 2>&1
-set -o errexit
-set -o errtrace
-set -o pipefail
-set -o nounset
+# Error trapping from https://gist.github.com/oldratlee/902ad9a398affca37bfcfab64612e7d1
+__error_trapper() {
+  local parent_lineno="$1"
+  local code="$2"
+  local commands="$3"
+  echo "error exit status $code, at file $0 on or near line $parent_lineno: $commands"
+}
+trap '__error_trapper "${LINENO}/${BASH_LINENO}" "$?" "$BASH_COMMAND"' ERR
 
-trap 'echo -e "\n\nExited due to script error! Exit value: $?\n\n"' ERR
+set -euE -o pipefail
+shopt -s failglob
+
+exec 2>&1
 
 if [[ ! ${1-} ]]
 then
@@ -71,3 +77,5 @@ date
 # shellcheck disable=SC2029
 ssh "$dest" rm "${LATEST_LINK}" || true
 ssh "$dest" ln -s "${DATETIME}" "${LATEST_LINK}"
+
+echo "self_backup completed successfully"

@@ -4,16 +4,6 @@
 # notes (although note that this script is 100% my creation).
 
 exec 2>&1
-set -o errexit
-set -o errtrace
-set -o pipefail
-set -o nounset
-
-trap 'exitval=$?
-if [[ $exitval -ne 0 ]]
-then
-  echo -e "\n\nExited due to script error! Exit value: $exitval\n\n" | tee | mailx -s "**** RESTORE TEST FAILED FOR $(id -un)!!!" "$email"
-fi' ERR EXIT
 
 if [[ ! ${1-} ]]
 then
@@ -32,6 +22,18 @@ fi
 
 email="$1"
 shift
+
+# Error trapping from https://gist.github.com/oldratlee/902ad9a398affca37bfcfab64612e7d1
+__error_trapper() {
+  local parent_lineno="$1"
+  local code="$2"
+  local commands="$3"
+  echo "error exit status $code, at file $0 on or near line $parent_lineno: $commands" | tee | mailx -s "**** RESTORE TEST FAILED FOR $(id -un)!!!" "$email"
+}
+trap '__error_trapper "${LINENO}/${BASH_LINENO}" "$?" "$BASH_COMMAND"' ERR
+
+set -euE -o pipefail
+shopt -s failglob
 
 BACKUP_DIR="backups/$(id -un)"
 
@@ -80,3 +82,5 @@ else
 fi
 
 rm -rf "${tmp_dir:?}/"
+
+echo "Restore test completed successfully"
