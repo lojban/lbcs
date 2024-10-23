@@ -169,7 +169,7 @@ fi
 if [[ ${run_pre_script-} ]]
 then
     echo -e "\nRunning pre-script for container $container\n"
-    bash -c "$(eval "$run_pre_script")"
+    eval "$run_pre_script"
     echo -e "\nDone running pre-script for container $container\n"
 fi
 
@@ -187,7 +187,7 @@ eval "$CONTAINER_BIN" run "--pod=$bundle" --log-driver=none --name "$name" \
 if [[ ${run_post_script-} ]]
 then
     echo -e "\nRunning post-script for container $container\n"
-    bash -c "$(eval "$run_post_script")"
+    eval "$run_post_script"
     echo -e "\nDone running post-script for container $container\n"
 fi
 
