@@ -199,7 +199,13 @@ else
 fi
 
 echo -e "\nChecking for template output ignores"
-find "$maindir/" "${template_find-}" -type f -name '*.erb' -print >"/tmp/toi.$$"
+# NB: it's very important to *not* quote the template_find thing
+# below, as if it's empty find will be made about an empty argument,
+# and also it needs to be able to expand to more than one argument;
+# example value: template_find='-name shared_data -prune -o '
+#
+# shellcheck disable=SC2086
+find "$maindir/" ${template_find:-} -type f -name '*.erb' -print >"/tmp/toi.$$"
 # shellcheck disable=SC2002
 if [[ $(cat "/tmp/toi.$$" | wc -l) -eq 0 ]]
 then
