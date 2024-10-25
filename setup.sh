@@ -214,6 +214,9 @@ else
     if [[ ! -f $maindir/.gitignore ]]
     then
         echo -e '\n\nWARNING: You have template files but no .gitignore file; it is important that your template output files be in .gitignore, both to prevent accidental checkins of irrelevant crap and because they might have expanded secrets in them.\n\n'
+        echo "Here's a list of your template files: "
+        echo
+        cat "/tmp/toi.$$"
     else
         comm -13 <(sort .gitignore) <(sed -e "s;^$maindir/;;" -e 's/\.erb$//' "/tmp/toi.$$" | sort | uniq) >"/tmp/toi-comm.$$"
         # shellcheck disable=SC2002
