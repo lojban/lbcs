@@ -54,7 +54,9 @@ BACKUP_PATH="${BACKUP_DIR}/${DATETIME}"
 LATEST_LINK="${BACKUP_DIR}/latest"
 
 # Set up the restore test file
+shopt -u failglob
 rm -f "$HOME"/.rsync-restore-test-*
+shopt -s failglob
 date "+%Y%m%d" >"$HOME/.rsync-restore-test-$(date +%Y%m%d)"
 
 # Get the host key -_-;
