@@ -101,7 +101,7 @@ fi
 #
 # If there's only one container in the pod, that's the
 # infrastructure container (or it's broken)
-if [[ $($CONTAINER_BIN pod inspect "$bundle" 2>/dev/null | jq -r '.Containers | .[].State' 2>/dev/null | grep -c '^running$' 2>/dev/null) -le 1 ]]
+if [[ $($CONTAINER_BIN pod inspect "$bundle" 2>/dev/null | jq -r '.[] | .Containers | .[].State' 2>/dev/null | grep -c '^running$' 2>/dev/null) -le 1 ]]
 then
     echo -e "\nPod $bundle appears to be empty; re-creating to pick up any config changes."
     $CONTAINER_BIN pod rm "$bundle" || true
