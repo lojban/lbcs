@@ -38,6 +38,14 @@ fi
 dest="$1"
 shift
 
+maindir="$(readlink -f "$(dirname "$0")")"
+lbcsdir="$(dirname "$(readlink -f "$0")")"
+
+# shellcheck disable=SC1091
+. "$lbcsdir/config"
+# shellcheck disable=SC1091
+. "$maindir/config"
+
 BACKUP_DIR="backups/$(id -un)"
 
 # Set up the restore test file
@@ -53,10 +61,11 @@ set -x
 ssh "$dest" mkdir -p "${BACKUP_DIR}"
 
 date
-rsync -v -a -SHA --delete \
+rsync -v -a -SHA --delete --delete-excluded \
   "$HOME/" \
   --exclude=".cache" \
   --exclude=".local" \
+  ${backup_extra_excludes:-} \
   "$dest:${BACKUP_DIR}/" || true
 date
 
