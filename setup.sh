@@ -112,8 +112,14 @@ fi
 
 if [[ ! ${bundle-} ]]
 then
-    echo "No bundle name (tag 'bundle') found in $maindir/config  ; please set.  (Used to be called 'service'.)"
-    exit 1
+    # We hit a case where a single account needed two distinct
+    # podman *pods*, so bundle is defined in the container configs;
+    # we use nobundle to indicate that situation
+    if [[ ! ${nobundle-} ]]
+    then
+        echo "No bundle name (tag 'bundle') found in $maindir/config  ; please set.  (Used to be called 'service'.)"
+        exit 1
+    fi
 fi
 
 cd "$maindir"
