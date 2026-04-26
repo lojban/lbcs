@@ -60,8 +60,15 @@ set -x
 
 ssh "$dest" mkdir -p "${BACKUP_DIR}"
 
+if [[ ${NO_VERBOSE-} ]]
+then
+  rsync_verbose=''
+else
+  rsync_verbose='-v'
+fi
+
 date
-rsync -v -a -SHA --delete --delete-excluded \
+rsync $rsync_verbose -a -SHA --delete --delete-excluded \
   "$HOME/" \
   --exclude=".cache" \
   --exclude=".local" \
