@@ -37,6 +37,7 @@ name=''
 run_program=''
 pod_slirp4netns_extras=''
 use_host_networking=''
+container_max_mem='8g'
 
 # shellcheck disable=SC1091
 . "$lbcsdir/config"
@@ -198,7 +199,7 @@ echo -e "\nRunning container $name for bundle $bundle\n"
 # we have podman do it as well we get double logging in journalctl
 eval "$CONTAINER_BIN" run "--pod=$bundle" --log-driver=none --name "$name" \
     "$run_args" \
-    -i "$hasterm" "$(id -un)/$bundle-$container:$version" "$run_program" 2>&1
+    -i "$hasterm" -m "$container_max_mem" "$(id -un)/$bundle-$container:$version" "$run_program" 2>&1
 
 if [[ ${run_post_script-} ]]
 then
